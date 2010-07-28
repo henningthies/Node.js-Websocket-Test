@@ -10,7 +10,7 @@ function main () {
     connection.addListener("connect", function (resource) { 
       connection.player = new Player();
       connection.id = parseInt(Math.random()* 9999999);
-			connection.write(JSON.stringify({"command":"connected", "data": { "id": connection.id } }));
+      connection.write(JSON.stringify({"command":"connected", "data": { "id": connection.id } }));
       lobby.join(connection);
     });
 
@@ -29,9 +29,9 @@ function main () {
           case 'changeDirection':
             connection.player.changeDirection(data["data"]);
             break;
-					case 'changeStatus':
-						connection.player.changeStatus(data["data"]);
-						break;
+          case 'changeStatus':
+            connection.player.changeStatus(data["data"]);
+            break;
         }
       }
     });
@@ -49,10 +49,10 @@ function main () {
 
 Lobby = function() {
   this.connections = {};
-	var lobby = this;
-	// Pick random connection for the next Match
+  var lobby = this;
+  // Pick random connection for the next Match
   var lobbyInterval = setInterval(function(){
-		if(lobby.connections && lobby.countConnections() > 1){
+    if(lobby.connections && lobby.countConnections() > 1){
       var matchPlayer = [];
       for(id in lobby.connections){
         matchPlayer.push(lobby.connections[id]);
@@ -79,9 +79,9 @@ Lobby.prototype.join = function(connection) {
   this.broadcast("join", {"id":connection.id, "name": connection.player.getName()});
 };
 Lobby.prototype.part = function(id) {
-	this.connections[id];
+  this.connections[id];
   delete this.connections[id];  
-	this.broadcast("part" , {"id":id});
+  this.broadcast("part" , {"id":id});
 };
 Lobby.prototype.broadcast = function(command, data) {
   for(id in this.connections){
@@ -89,11 +89,11 @@ Lobby.prototype.broadcast = function(command, data) {
   }
 };
 Lobby.prototype.countConnections = function() {
-	var count = 0;
-	for(id in this.connections){
-		count++;
+  var count = 0;
+  for(id in this.connections){
+    count++;
   };
-	return count;
+  return count;
 };
 
 
@@ -104,22 +104,22 @@ Match = function(connections, callback){
 };
 
 Match.prototype.prepare = function() {
-	var match = this;
+  var match = this;
   this.stage = {}; 
-	this.broadcast("prepareStage",{});
+  this.broadcast("prepareStage",{});
   for (var i=0; i < this.connections.length; i++) {
     var connection = this.connections[i];
     var startDirection = i == 0 ? 2 : 0;
     connection.player.setDirection(startDirection);
     var startPosition = i == 0 ? {x: 50,y: 100} : {x: 250,y: 100};
     connection.player.setPosition(startPosition);
-		this.broadcast("updateStage", {
-			id: connection.id,
-			x: startPosition.x,
-			y: startPosition.y,
-			dir: startDirection,
-			color: connection.player.color
-		});
+    this.broadcast("updateStage", {
+      id: connection.id,
+      x: startPosition.x,
+      y: startPosition.y,
+      dir: startDirection,
+      color: connection.player.color
+    });
   };
   var ontick = function() {
     for (var i=0; i < match.connections.length; i++) {
@@ -127,31 +127,31 @@ Match.prototype.prepare = function() {
       var moved = match.move(connection);
       if(moved){
         var pos = connection.player.getPosition();
-				var direction = connection.player.getDirection();
+        var direction = connection.player.getDirection();
         match.broadcast("updateStage", {
           id: connection.id,
           x: pos.x,
           y: pos.y,
-					dir: direction,
-					color: connection.player.color
+          dir: direction,
+          color: connection.player.color
         });
       } else { 
-				match.broadcast("endMatch", {"looser": connection.id} );
-				match.end();
-				break;
+        match.broadcast("endMatch", {"looser": connection.id} );
+        match.end();
+        break;
       }
     };
   };
   this.matchLoop = new MatchLoop(ontick);
-	setTimeout(function() {
-		match.broadcast("startMatch", {});
-		match.start();
-	}, 5000);
+  setTimeout(function() {
+    match.broadcast("startMatch", {});
+    match.start();
+  }, 5000);
 };
 Match.prototype.move = function(connection) {
   var oldPos = connection.player.getPosition();
   var newPos;
-	var direction = connection.player.getDirection();
+  var direction = connection.player.getDirection();
   switch(direction) {
     case 0:
       newPos = {
@@ -182,32 +182,32 @@ Match.prototype.move = function(connection) {
     connection.player.die();
     return false;
   } else {
-		connection.player.setPosition(newPos);
+    connection.player.setPosition(newPos);
     this.stage[newPos.x+":"+newPos.y] = connection.id;
     return true;
   }
   
 };
 Match.prototype.start = function() {
-	this.matchLoop.start();
+  this.matchLoop.start();
 };
 Match.prototype.end = function() {
-	this.matchLoop.stop();
+  this.matchLoop.stop();
   this.callback(this.connections);
 };
 Match.prototype.broadcast = function(command, data) {
   var message = JSON.stringify({"command": command, "data": data});
   for (var i=0; i < this.connections.length; i++) {
     var connection = this.connections[i];
-		connection.write(message);
-	}
+    connection.write(message);
+  }
 };
 MatchLoop = function(ontick) {
   this.ontick = ontick;
 };
 MatchLoop.prototype.start = function() {
   var ontick = this.ontick;
-	this.interval = setInterval(function() {
+  this.interval = setInterval(function() {
     ontick();
   }, 50); 
 };
@@ -218,7 +218,7 @@ MatchLoop.prototype.stop = function() {
 
 Player = function() {
   this.name = "Unknown Player";
-	this.color = "rgb("+parseInt(Math.random()*255)+","+parseInt(Math.random()*255)+","+parseInt(Math.random()*255)+")";
+  this.color = "rgb("+parseInt(Math.random()*255)+","+parseInt(Math.random()*255)+","+parseInt(Math.random()*255)+")";
 }; 
 Player.prototype.setName = function(name) {
   this.name = name;
